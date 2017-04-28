@@ -41,6 +41,7 @@
 #include <libsolidity/interface/Natspec.h>
 #include <libsolidity/interface/GasEstimator.h>
 #include <libsolidity/formal/Why3Translator.h>
+#include <libsolidity/codegen/JuliaCompiler.h>
 
 #include <libevmasm/Exceptions.h>
 
@@ -335,6 +336,16 @@ bool CompilerStack::prepareFormalAnalysis(ErrorList* _errors)
 	m_formalTranslation = translator.translation();
 
 	return true;
+}
+
+void CompilerStack::prepareJulia(ErrorList *_errors)
+{
+	if (!_errors)
+		_errors = &m_errors;
+	JuliaCompiler julia(*_errors);
+	for (Source const* source: m_sourceOrder)
+		julia.process(*source->ast);
+	m_juliaBody = julia.body();
 }
 
 eth::AssemblyItems const* CompilerStack::assemblyItems(string const& _contractName) const

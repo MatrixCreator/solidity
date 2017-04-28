@@ -37,6 +37,7 @@
 #include <libevmasm/LinkerObject.h>
 #include <libsolidity/interface/Exceptions.h>
 #include <libsolidity/interface/ReadFile.h>
+#include <libsolidity/inlineasm/AsmData.h>
 
 namespace dev
 {
@@ -132,6 +133,9 @@ public:
 	/// @returns false on error.
 	bool prepareFormalAnalysis(ErrorList* _errors = nullptr);
 	std::string const& formalTranslation() const { return m_formalTranslation; }
+
+	void prepareJulia(ErrorList* _errors = nullptr);
+	assembly::Block const& julia() const { return m_juliaBody; }
 
 	/// @returns the assembled object for a contract.
 	eth::LinkerObject const& object(std::string const& _contractName = "") const;
@@ -292,6 +296,7 @@ private:
 	ErrorList m_errors;
 	bool m_metadataLiteralSources = false;
 	State m_stackState = Empty;
+	assembly::Block m_juliaBody;
 };
 
 }
