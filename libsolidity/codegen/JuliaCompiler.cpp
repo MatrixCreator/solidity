@@ -41,3 +41,77 @@ void JuliaCompiler::fatalError(ASTNode const& _node, string const& _description)
 	error(_node, _description);
 	BOOST_THROW_EXCEPTION(FatalError());
 }
+
+bool JuliaCompiler::visit(ContractDefinition const& _contract)
+{
+	if (!_contract.baseContracts().empty())
+		error(*_contract.baseContracts().front(), "Inheritance not supported.");
+	if (!_contract.definedStructs().empty())
+		error(*_contract.definedStructs().front(), "User-defined types not supported.");
+	if (!_contract.definedEnums().empty())
+		error(*_contract.definedEnums().front(), "User-defined types not supported.");
+	if (!_contract.events().empty())
+		error(*_contract.events().front(), "Events not supported.");
+	if (!_contract.functionModifiers().empty())
+		error(*_contract.functionModifiers().front(), "Modifiers not supported.");
+
+	ASTNode::listAccept(_contract.definedFunctions(), *this);
+
+	return false;
+}
+
+bool JuliaCompiler::visit(FunctionDefinition const& _function)
+{
+	if (!_function.isImplemented())
+	{
+		error(_function, "Unimplemented functions not supported.");
+		return false;
+	}
+	if (_function.name().empty())
+	{
+		error(_function, "Fallback functions not supported.");
+		return false;
+	}
+	if (!_function.modifiers().empty())
+	{
+		error(_function, "Modifiers not supported.");
+		return false;
+	}
+	if (!_function.parameters().empty())
+	{
+		error(_function, "Parameters not supported.");
+		return false;
+	}
+	if (!_function.returnParameters().empty())
+	{
+		error(_function, "Return parameters not supported.");
+		return false;
+	}
+
+	assembly::FunctionDefinition funDef;
+	funDef.name = _function.name();
+	m_currentFunction = funDef;
+	_function.body().accept(*this);
+	return false;
+}
+
+void JuliaCompiler::endVisit(FunctionDefinition const&)
+{
+	// invalidate m_currentFunction
+	m_body.statements.emplace_back(m_currentFunction);
+}
+
+bool JuliaCompiler::visit(Block const& _node)
+{
+	for (size_t i = 0; i < _node.statements().size(); ++i)
+		_node.statements()[i]->accept(*this);
+	return false;
+}
+
+bool JuliaCompiler::visit(Throw const&)
+{
+	assembly::FunctionCall funCall;
+	funCall.functionName.name = "revert";
+	m_currentFunction.body.statements.emplace_back(funCall);
+	return false;
+}
