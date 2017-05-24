@@ -41,6 +41,9 @@ struct Identifier;
 namespace julia
 {
 
+///
+/// Assembly class that abstracts both the libevmasm assembly and the new julia evm assembly.
+///
 class AbstractAssembly
 {
 public:
@@ -66,6 +69,21 @@ public:
 	/// Append a reference to a to-be-linked symobl.
 	/// Currently, we assume that the value is always a 20 byte number.
 	virtual void appendLinkerSymbol(std::string const& _name) = 0;
+
+	/// Append a jump instruction.
+	/// @param _stackDiffAfter the stack adjustment after this instruction.
+	virtual void appendJump(int _stackDiffAfter) = 0;
+
+	/// Append a jump-to-immediate operation.
+	virtual void appendJumpTo(LabelID _label, int _stackDiffAfter = 0) = 0;
+	/// Append a jump-to-if-immediate operation.
+	virtual void appendJumpToIf(LabelID _label) = 0;
+	/// Start a subroutine.
+	virtual void appendBeginsub(LabelID _label, int _arguments) = 0;
+	/// Call a subroutine.
+	virtual void appendJumpsub(LabelID _label, int _arguments, int _returns) = 0;
+	/// Return from a subroutine.
+	virtual void appendReturnsub(int _returns) = 0;
 };
 
 enum class IdentifierContext { LValue, RValue };

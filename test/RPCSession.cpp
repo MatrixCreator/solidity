@@ -316,9 +316,7 @@ Json::Value RPCSession::rpcCall(string const& _methodName, vector<string> const&
 	request += "],\"id\":" + to_string(m_rpcSequence) + "}";
 	++m_rpcSequence;
 
-	BOOST_TEST_MESSAGE("Request: " + request);
 	string reply = m_ipcSocket.sendRequest(request);
-	BOOST_TEST_MESSAGE("Reply: " + reply);
 
 	Json::Value result;
 	BOOST_REQUIRE(Json::Reader().parse(reply, result, false));
