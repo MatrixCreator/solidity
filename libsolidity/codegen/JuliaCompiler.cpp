@@ -90,6 +90,7 @@ bool JuliaCompiler::visit(FunctionDefinition const& _function)
 
 	assembly::FunctionDefinition funDef;
 	funDef.name = _function.name();
+	funDef.location = _function.location();
 	m_currentFunction = funDef;
 	_function.body().accept(*this);
 	return false;
@@ -108,10 +109,11 @@ bool JuliaCompiler::visit(Block const& _node)
 	return false;
 }
 
-bool JuliaCompiler::visit(Throw const&)
+bool JuliaCompiler::visit(Throw const& _throw)
 {
 	assembly::FunctionCall funCall;
 	funCall.functionName.name = "revert";
+	funCall.location = _throw.location();
 	m_currentFunction.body.statements.emplace_back(funCall);
 	return false;
 }
