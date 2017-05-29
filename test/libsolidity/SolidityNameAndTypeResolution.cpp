@@ -5158,7 +5158,7 @@ BOOST_AUTO_TEST_CASE(inline_assembly_constant_access)
 	CHECK_ERROR(text, TypeError, "Constant variables not supported by inline assembly");
 }
 
-BOOST_AUTO_TEST_CASE(inline_assembly_variable_access_out_of_functions)
+BOOST_AUTO_TEST_CASE(inline_assembly_local_variable_access_out_of_functions)
 {
 	char const* text = R"(
 		contract test {
@@ -5171,6 +5171,37 @@ BOOST_AUTO_TEST_CASE(inline_assembly_variable_access_out_of_functions)
 		}
 	)";
 	CHECK_ERROR(text, DeclarationError, "Inline assembly functions cannot access their outer scope.");
+}
+
+BOOST_AUTO_TEST_CASE(inline_assembly_local_variable_access_out_of_functions_storage_ptr)
+{
+	char const* text = R"(
+		contract test {
+			uint[] r;
+			function f() {
+				uint[] storage a = r;
+				assembly {
+					function g() -> x { x := a_offset }
+				}
+			}
+		}
+	)";
+	CHECK_ERROR(text, DeclarationError, "Inline assembly functions cannot access their outer scope.");
+}
+
+BOOST_AUTO_TEST_CASE(inline_assembly_storage_variable_access_out_of_functions)
+{
+	char const* text = R"(
+		contract test {
+			uint a;
+			function f() {
+				assembly {
+					function g() -> x { x := a_slot }
+				}
+			}
+		}
+	)";
+	CHECK_SUCCESS_NO_WARNINGS(text);
 }
 
 BOOST_AUTO_TEST_CASE(invalid_mobile_type)
