@@ -348,6 +348,19 @@ void CompilerStack::prepareJulia(ErrorList *_errors)
 	m_juliaBody = julia.body();
 }
 
+AssemblyStack const CompilerStack::assemblyStack() const
+{
+	/// TODO: return an assembly for each contract
+	ErrorList errors;
+	JuliaCompiler julia(errors);
+	for (Source const* source: m_sourceOrder)
+		julia.process(*source->ast);
+	AssemblyStack stack;
+	/// TODO: set scanner
+	stack.analyze(julia.body());
+	return stack;
+}
+
 eth::AssemblyItems const* CompilerStack::assemblyItems(string const& _contractName) const
 {
 	Contract const& currentContract = contract(_contractName);
