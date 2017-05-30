@@ -33,6 +33,7 @@ using namespace std;
 using namespace dev;
 using namespace dev::solidity;
 
+/* I was here */
 
 bool TypeChecker::checkTypeRequirements(ASTNode const& _contract)
 {
