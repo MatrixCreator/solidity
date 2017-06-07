@@ -1550,6 +1550,9 @@ bool TypeChecker::visit(MemberAccess const& _memberAccess)
 	if (auto tt = dynamic_cast<TypeType const*>(exprType.get()))
 		if (tt->actualType()->category() == Type::Category::Enum)
 			annotation.isPure = true;
+	/* todo: check code	
+	if (MemberName=="CallCode") m_errorReporter.warning("CallCode is deprecated and will not be supported in next version 0.5 anymore. Please use DelegateCall.");
+	*/
 
 	return false;
 }
